@@ -1,0 +1,8 @@
+CHANGELOG - MIVA-COS201-Midsemester-Assessment
+================================================
+
+This file tracks all changes and updates made to the project.
+
+Format: [DATE] [TIME] - CHANGE DESCRIPTION
+-------------------------------------------
+
