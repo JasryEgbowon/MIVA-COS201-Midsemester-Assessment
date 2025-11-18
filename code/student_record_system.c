@@ -1,4 +1,4 @@
-//Ayo Please note there is a Bug in the code, the when a name with spaces is inputed it runs an infinite the code, please fix it. dont forget
+
 
 #include <stdio.h>
 #include <stdlib.h>
