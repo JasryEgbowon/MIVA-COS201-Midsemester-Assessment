@@ -5,7 +5,7 @@
 ![Project](https://img.shields.io/badge/Project-Student%20Record%20System-red)
 ![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
 
-![alt text](image.png)<br>
+![alt text](image-1.png)<br>
 A comprehensive C application for managing student records, grades, and academic data with persistent storage capabilities.
 
 ## Quick Start to use this code
