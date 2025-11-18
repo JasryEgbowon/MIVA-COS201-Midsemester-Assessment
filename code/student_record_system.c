@@ -30,6 +30,28 @@ void saveToFile();
 void loadFromFile();
 void modifyStudent();
 int findStudentByRoll(int rollNumber);
+void readLine(char *buf, int size);
+
+// Helper to read a whole line from stdin (accepts spaces) and strip newline
+void readLine(char *buf, int size) {
+    if(buf == NULL || size <= 0) return;
+    while (fgets(buf, size, stdin)) {
+        size_t len = strlen(buf);
+        if (len > 0 && buf[len-1] == '\n') {
+            buf[len-1] = '\0';
+            if (buf[0] == '\0') {
+                // empty line (user just pressed enter) -> prompt again
+                continue;
+            }
+            break;
+        }
+        // If there's no newline, the input was longer than the buffer - clear rest
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF);
+        if (strlen(buf) == 0) continue;
+        break;
+    }
+}
 
 int main() {
     // Here Welcomes the user (we use functions for better organization)
@@ -97,7 +119,7 @@ void displayWelcome() {
     printf("   STUDENT RECORD SYSTEM\n");
     printf("---------------------------------\n");
     printf("Welcome! Please enter your name: ");
-    scanf("%s", currentUser);
+    readLine(currentUser, sizeof(currentUser));
     printf("Hello, %s! Let's manage some student records.\n", currentUser);
 }
 
@@ -111,8 +133,8 @@ void addStudent() {
     Student newStudent;
     
     printf("\n--- Adding New Student ---\n");
-    printf("Enter student name: (make sure there are no spaces) ");// this was changed by AYO, if there's any errrors come check here !
-    scanf("%s", newStudent.name);//Note there must be no spaces in the name
+    printf("Enter student name: ");
+    readLine(newStudent.name, sizeof(newStudent.name));
     printf("Enter roll number: ");
     scanf("%d", &newStudent.rollNumber);
     printf("Enter marks: ");
@@ -211,7 +233,7 @@ void modifyStudent() {
     printf("Marks: %.2f\n", students[index].marks);
     
     printf("\nEnter new name: ");
-    scanf("%s", students[index].name);
+    readLine(students[index].name, sizeof(students[index].name));
     printf("Enter new marks: ");
     scanf("%f", &students[index].marks);
     
@@ -285,7 +307,7 @@ void saveToFile() {
     
     char filename[50];
     printf("Enter filename to save (e.g., records.txt): ");
-    scanf("%s", filename);
+    readLine(filename, sizeof(filename));
     
     FILE *file = fopen(filename, "w");
     if(file == NULL) {
@@ -295,10 +317,11 @@ void saveToFile() {
     
     // Write each student to the file
     for(int i = 0; i < studentCount; i++) {
-        fprintf(file, "%s %d %.2f\n", 
-                students[i].name, 
-                students[i].rollNumber, 
-                students[i].marks);
+        // Use '|' as delimiter so names with spaces are preserved
+        fprintf(file, "%s|%d|%.2f\n",
+            students[i].name,
+            students[i].rollNumber,
+            students[i].marks);
     }
     
     fclose(file);
@@ -309,7 +332,7 @@ void saveToFile() {
 void loadFromFile() {
     char filename[50];
     printf("Enter filename to load: ");
-    scanf("%s", filename);
+    readLine(filename, sizeof(filename));
     
     FILE *file = fopen(filename, "r");
     if(file == NULL) {
@@ -319,14 +342,21 @@ void loadFromFile() {
     
     // Reset student count when loading from file
     studentCount = 0;
-    
-    // Read until we reach max students or end of file
-    while(studentCount < MAX_STUDENTS && 
-          fscanf(file, "%s %d %f", 
-                 students[studentCount].name,
-                 &students[studentCount].rollNumber,
-                 &students[studentCount].marks) == 3) {
-        studentCount++;
+
+    // Read each line and parse fields separated by '|'
+    char line[200];
+    while(studentCount < MAX_STUDENTS && fgets(line, sizeof(line), file)) {
+        // remove trailing newline
+        size_t ln = strlen(line);
+        if (ln > 0 && line[ln-1] == '\n') line[ln-1] = '\0';
+
+        // parse: name up to '|', then roll, then marks
+        if (sscanf(line, "%49[^|]|%d|%f", 
+                   students[studentCount].name,
+                   &students[studentCount].rollNumber,
+                   &students[studentCount].marks) == 3) {
+            studentCount++;
+        }
     }
     
     fclose(file);
